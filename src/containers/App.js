@@ -1,4 +1,7 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
+import { bindActionCreators } from 'redux'
+import { connect } from 'react-redux'
+import * as FormActions from '../actions/FormActions'
 
 /*
   Let's change App to a full class Component instead of state-less functional Component
@@ -7,14 +10,6 @@ import React, { Component } from 'react'
 class App extends Component {
   constructor(props) {
     super(props)
-    // Let's store the value of `name` in component's state
-    this.state = {
-      name: '',
-      email: '',
-      checkbox: '',
-      radio: 'option1',
-      date: ''
-    }
     // Need to bind `this` to `handleInputChange` in order to be able to access `this` inside it
     this.handleInputChange = this.handleInputChange.bind(this)
   }
@@ -23,38 +18,37 @@ class App extends Component {
     return (event) => {
       // Get `value` from `onChange` event (it is triggered on input when user types in the input)
       const { value } = event.target
-      // Save this value to our state
-      this.setState({
-        [inputName]: value
-      })
+      // Now, instead of saving to component's state, update value in `Form` reducer, by using `updateValue` action:
+      this.props.actions.updateValue(inputName, value)
     }
   }
 
   render() {
-    const alertMsg = this.state.name ? `Hi ${this.state.name}!` : 'Hi! What\'s your name?'
+    const { form } = this.props
+    const alertMsg = form.name ? `Hi ${form.name}!` : 'Hi! What\'s your name?'
     return (
       <div>
-        <h1>Hello React Forms - part 3</h1>
+        <h1>Hello React Forms - part 4</h1>
         <p>
           {
-            'Ok, you probably came here for more advanced example. Let\'s add some inputs to our form...'
+            'Now let\'s connect our form to Redux and store all the form values in Reducer.'
           }
         </p>
         <form onSubmit={() => alert(alertMsg)}>
           <div>
             <label htmlFor="name">Your name:</label>
-            <input type="text" id="name" value={this.state.name} onChange={this.handleInputChange('name')} />
+            <input type="text" id="name" value={form.name} onChange={this.handleInputChange('name')} />
           </div>
           <div>
             <label htmlFor="email">Your email:</label>
-            <input type="email" id="email" value={this.state.email} onChange={this.handleInputChange('email')} />
+            <input type="email" id="email" value={form.email} onChange={this.handleInputChange('email')} />
           </div>
           <div>
             <label htmlFor="checkbox">
               <input
                 type="checkbox"
                 id="checkbox"
-                value={this.state.checkbox}
+                value={form.checkbox}
                 onChange={this.handleInputChange('checkbox')}
               />
               Checkbox example
@@ -67,7 +61,7 @@ class App extends Component {
                 id="radio1"
                 name="radio"
                 value="option1"
-                checked={this.state.radio === 'option1'}
+                checked={form.radio === 'option1'}
                 onChange={this.handleInputChange('radio')}
               />
               Option 1
@@ -78,7 +72,7 @@ class App extends Component {
                 id="radio2"
                 name="radio"
                 value="option2"
-                checked={this.state.radio === 'option2'}
+                checked={form.radio === 'option2'}
                 onChange={this.handleInputChange('radio')}
               />
               Option 2
@@ -89,7 +83,7 @@ class App extends Component {
                 id="radio3"
                 name="radio"
                 value="option3"
-                checked={this.state.radio === 'option3'}
+                checked={form.radio === 'option3'}
                 onChange={this.handleInputChange('radio')}
               />
               Option 3
@@ -97,7 +91,7 @@ class App extends Component {
           </div>
           <div>
             <label htmlFor="date">Date example:</label>
-            <input type="date" id="date" value={this.state.date} onChange={this.handleInputChange('date')} />
+            <input type="date" id="date" value={form.date} onChange={this.handleInputChange('date')} />
           </div>
           <button type="submit">Say hi!</button>
         </form>
@@ -106,4 +100,33 @@ class App extends Component {
   }
 }
 
-export default App
+App.propTypes = {
+  form: PropTypes.shape({
+    name: PropTypes.string,
+    email: PropTypes.string,
+    checkbox: PropTypes.string,
+    radio: PropTypes.string,
+    date: PropTypes.string
+  }).isRequired,
+  actions: PropTypes.shape({
+    updateValue: PropTypes.function
+  }).isRequired
+}
+
+// Now our form values will be stored in `Form` reducer and will be passed to this component in this.props.form
+function mapStateToProps(state) {
+  return {
+    form: state.form
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(FormActions, dispatch)
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App)

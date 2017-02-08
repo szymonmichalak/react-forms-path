@@ -35,5 +35,12 @@ module.exports = {
         include: path.join(__dirname, 'src')
       }
     ]
+  },
+  // Needed to make `Joi` validation work on client too
+  node: {
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty',
+    dns: 'empty'
   }
 };

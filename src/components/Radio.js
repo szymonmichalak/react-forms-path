@@ -25,11 +25,11 @@ class Radio extends Component {
   }
 
   render() {
-    const { options, error } = this.props
+    const { options, errors } = this.props
     return (
       <div>
         { options.map(this.renderSingle) }
-        { error ? <span>{error}</span> : null }
+        { errors ? <span>{errors}</span> : null }
       </div>
     )
   }
@@ -39,14 +39,14 @@ Radio.propTypes = {
   name: PropTypes.string.isRequired,
   options: PropTypes.arrayOf(PropTypes.string).isRequired,
   value: PropTypes.string,
-  error: PropTypes.string,
+  errors: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func,
   onBlur: PropTypes.func
 }
 
 Radio.defaultProps = {
   value: '',
-  error: null,
+  errors: null,
   onChange() {},
   onBlur() {}
 }

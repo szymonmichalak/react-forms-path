@@ -1,10 +1,10 @@
 import React, { PropTypes } from 'react'
 
-const Input = ({ name, label, error, ...inputProps }) => (
+const Input = ({ name, label, errors, ...inputProps }) => (
   <div>
     { label ? <label htmlFor={name}>{label}</label> : null }
     <input id={name} {...inputProps} />
-    { error ? <span>{error}</span> : null }
+    { errors ? <span>{errors}</span> : null }
   </div>
 )
 
@@ -13,7 +13,7 @@ Input.propTypes = {
   value: PropTypes.string,
   label: PropTypes.string,
   type: PropTypes.string,
-  error: PropTypes.string,
+  errors: PropTypes.arrayOf(PropTypes.string),
   onChange: PropTypes.func,
   onBlur: PropTypes.func
 }
@@ -21,7 +21,7 @@ Input.propTypes = {
 Input.defaultProps = {
   value: '',
   label: null,
-  error: null,
+  errors: null,
   type: 'text',
   onChange() {},
   onBlur() {},

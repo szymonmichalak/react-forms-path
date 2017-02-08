@@ -1,20 +1,28 @@
 import React, { Component, PropTypes } from 'react'
+import Joi from 'joi'
+import validation from 'react-validation-mixin'
+import strategy from 'joi-validation-strategy'
 import Input from './Input'
 import Checkbox from './Checkbox'
 import Radio from './Radio'
-import isEmail from '../helpers/isEmail'
 
 class Form extends Component {
   constructor(props) {
     super(props)
-    this.requiredFields = ['name', 'email']
-    this.state = {
-      errors: {}
+    // Define your validation rules in the form of object
+    this.validatorTypes = {
+      name: Joi.string().min(3).max(30).required().label('Name'),
+      email: Joi.string().email().required().label('Email')
     }
     // Need to bind `this` to `handleInputChange` in order to be able to access `this` inside it
     this.handleInputChange = this.handleInputChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
-    this.validateFields = this.validateFields.bind(this)
+    this.getValidatorData = this.getValidatorData.bind(this)
+  }
+
+  getValidatorData() {
+    // return data we want to validate
+    return this.props.form
   }
 
   handleInputChange(inputName) {
@@ -26,57 +34,28 @@ class Form extends Component {
     }
   }
 
-  validateFields(fieldName) {
-    const { form } = this.props
-    const fields = fieldName ? [fieldName] : Object.keys(form) // get all field names if field argument is not there
-    const errors = {}
-    let isValid = true
-
-    fields.forEach((field) => {
-      // General check for required fields
-      if (this.requiredFields.includes(field) && !form[field]) {
-        errors[field] = 'Required'
-        isValid = false
-      // specific validation check
-      } else if (field === 'email' && !isEmail(form[field])) {
-        errors[field] = 'Please provide valid email address'
-        isValid = false
-      // reset error in case user corrected the input
-      } else {
-        errors[field] = null
-      }
-    })
-
-    this.setState({
-      errors: {
-        ...this.state.errors,
-        ...errors
-      }
-    })
-
-    return isValid
-  }
-
   handleSubmit(event) {
     event.preventDefault() // stop submitting the form
-    const isValid = this.validateFields()
-    if (isValid) {
-      console.log('Form is valid, submit!')
-    } else {
-      // Validation Errors displayed to the user
+    const onValidate = error => {
+      if (error) {
+        // Validation Errors displayed to the user
+      } else {
+        console.log('Form is valid, submit!')
+      }
     }
+    // Run `validate` method from `react-validation-mixin`
+    this.props.validate(onValidate)
   }
 
   render() {
-    const { form } = this.props
-    const { errors } = this.state
+    const { form, getValidationMessages, handleValidation } = this.props
     return (
       <div>
-        <h1>Hello React Forms - part 6</h1>
+        <h1>Hello React Forms - part 7</h1>
         <p>
           {
-            `What about validation? I would like to add some required fields,
-            validate if email is in correct format, etc.`
+            `Instead of reinventing the wheel and creating our own validation checks, let’s use some ready
+            validation methods`
           }
         </p>
         <form onSubmit={this.handleSubmit} noValidate>
@@ -84,43 +63,43 @@ class Form extends Component {
             name="name"
             label="Your name:"
             value={form.name}
-            error={errors.name}
+            errors={getValidationMessages('name')}
             onChange={this.handleInputChange('name')}
-            onBlur={() => this.validateFields('name')}
+            onBlur={handleValidation('name')}
           />
           <Input
             name="email"
             type="email"
             label="Your email:"
             value={form.email}
-            error={errors.email}
+            errors={getValidationMessages('email')}
             onChange={this.handleInputChange('email')}
-            onBlur={() => this.validateFields('email')}
+            onBlur={handleValidation('email')}
           />
           <Checkbox
             name="checkbox"
             label="Checkbox example"
             value={form.checkbox}
-            error={errors.checkbox}
+            errors={getValidationMessages('checkbox')}
             onChange={this.handleInputChange('checkbox')}
-            onBlur={() => this.validateFields('checkbox')}
+            onBlur={handleValidation('checkbox')}
           />
           <Radio
             name="radio"
             value={form.radio}
             options={['option1', 'option2', 'option3']}
-            error={errors.radio}
+            errors={getValidationMessages('radio')}
             onChange={this.handleInputChange('radio')}
-            onBlur={() => this.validateFields('radio')}
+            onBlur={handleValidation('radio')}
           />
           <Input
             type="date"
             name="date"
             label="Date example:"
             value={form.date}
-            error={errors.date}
+            errors={getValidationMessages('date')}
             onChange={this.handleInputChange('date')}
-            onBlur={() => this.validateFields('date')}
+            onBlur={handleValidation('date')}
           />
           <button type="submit">Submit</button>
         </form>
@@ -139,7 +118,14 @@ Form.propTypes = {
   }).isRequired,
   actions: PropTypes.shape({
     updateValue: PropTypes.function
-  }).isRequired
+  }).isRequired,
+  // Received from `react-validation-mixin` HoC
+  errors: PropTypes.object,
+  validate: PropTypes.func,
+  isValid: PropTypes.func,
+  getValidationMessages: PropTypes.func,
+  clearValidations: PropTypes.func
 }
 
-export default Form
+// Use `validation` Higher-Order Component to validate this component using `Joi` strategy
+export default validation(strategy)(Form)

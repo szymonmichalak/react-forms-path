@@ -1,9 +1,10 @@
 import React, { PropTypes } from 'react'
 
-const Input = ({ name, value, label, type, onChange, ...inputProps }) => (
+const Input = ({ name, label, error, ...inputProps }) => (
   <div>
     { label ? <label htmlFor={name}>{label}</label> : null }
-    <input type={type} id={name} value={value} onChange={onChange} {...inputProps} />
+    <input id={name} {...inputProps} />
+    { error ? <span>{error}</span> : null }
   </div>
 )
 
@@ -12,14 +13,18 @@ Input.propTypes = {
   value: PropTypes.string,
   label: PropTypes.string,
   type: PropTypes.string,
-  onChange: PropTypes.func
+  error: PropTypes.string,
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func
 }
 
 Input.defaultProps = {
   value: '',
   label: null,
+  error: null,
   type: 'text',
-  onChange() {}
+  onChange() {},
+  onBlur() {},
 }
 
 export default Input
